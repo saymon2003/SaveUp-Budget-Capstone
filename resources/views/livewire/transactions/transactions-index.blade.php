@@ -1,8 +1,8 @@
-<div class="bg-white p-6 shadow rounded-lg">
+<div class="space-y-6">
 
     <!-- HEADER -->
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-semibold">Your Transactions</h2>
+    <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold">Transactions</h2>
 
         <a href="{{ route('transactions.create') }}"
            class="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition">
@@ -10,127 +10,128 @@
         </a>
     </div>
 
-    <!-- EMPTY -->
+    <!-- EMPTY STATE -->
     @if ($transactions->isEmpty())
-        <p class="text-gray-500">No transactions yet.</p>
+        <div class="bg-white p-10 shadow rounded text-center text-gray-500">
+            No transactions yet.
+        </div>
 
     @else
-        <table class="w-full border rounded-lg overflow-hidden">
-            <thead class="bg-gray-100 border-b">
-                <tr>
-                    <th class="py-3 px-4 text-left">Type</th>
-                    <th class="py-3 px-4 text-left">Category</th>
-                    <th class="py-3 px-4 text-left">Amount</th>
-                    <th class="py-3 px-4 text-left">Date</th>
-                    <th class="py-3 px-4 text-left">Actions</th>
-                </tr>
-            </thead>
 
-            <tbody>
+        <!-- TRANSACTION CARDS -->
+        <div class="space-y-4">
+
             @foreach ($transactions as $t)
-                <tr class="
-                    border-b
-                    @if($t->type === 'income') bg-green-100 @else bg-red-100 @endif
-                    hover:bg-gray-200 transition
+
+                <div class="
+                    flex justify-between items-center p-4 rounded-lg shadow bg-white
+                    border-l-8 
+                    {{ $t->type === 'income' ? 'border-green-500' : 'border-red-500' }}
+                    hover:shadow-lg transition
                 ">
-                    <td class="py-3 px-4 capitalize">{{ $t->type }}</td>
-                    <td class="py-3 px-4">{{ $t->category }}</td>
+                    <!-- LEFT SIDE -->
+                    <div>
+                        <p class="text-lg font-semibold">{{ $t->category }}</p>
 
-                    <td class="py-3 px-4 font-semibold">
-                        @if ($t->type === 'income')
-                            <span class="text-green-700">+ ${{ number_format($t->amount, 2) }}</span>
-                        @else
-                            <span class="text-red-700">- ${{ number_format($t->amount, 2) }}</span>
-                        @endif
-                    </td>
+                        <p class="text-sm text-gray-500">
+                            {{ $t->date }}
+                        </p>
 
-                    <td class="py-3 px-4">{{ $t->date }}</td>
-
-                    <td class="py-3 px-4 flex gap-2">
-
-                        <!-- VIEW NOTES BUTTON -->
                         @if ($t->notes)
-                            <button 
-                                wire:click="openViewModal('{{ addslashes($t->notes) }}')"
-                                class="px-3 py-1 bg-blue-500 text-white rounded shadow hover:bg-blue-600 transition">
-                                View
+                            <button wire:click="openNotes({{ $t->id }})"
+                                    class="text-blue-600 text-sm underline mt-1">
+                                View Notes
                             </button>
+                        @endif
+                    </div>
+
+                    <!-- AMOUNT -->
+                    <div class="text-right">
+                        @if ($t->type === 'income')
+                            <p class="text-green-600 text-xl font-bold">+${{ number_format($t->amount, 2) }}</p>
                         @else
-                            <span class="text-gray-400 px-3 py-1">—</span>
+                            <p class="text-red-600 text-xl font-bold">-${{ number_format($t->amount, 2) }}</p>
                         @endif
 
-                        <!-- EDIT BUTTON -->
-                        <a href="{{ route('transactions.edit', $t->id) }}"
-                           class="px-3 py-1 bg-yellow-500 text-white rounded shadow hover:bg-yellow-600 transition">
-                            Edit
-                        </a>
+                        <!-- ACTION BUTTONS -->
+                        <div class="flex gap-2 mt-3">
 
-                        <!-- DELETE BUTTON -->
-                        <button 
-                            wire:click="openDeleteModal({{ $t->id }})"
-                            class="px-3 py-1 bg-red-600 text-white rounded shadow hover:bg-red-700 transition">
-                            Delete
-                        </button>
+                            <a href="{{ route('transactions.edit', $t->id) }}"
+                               class="px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition shadow">
+                                Edit
+                            </a>
 
-                    </td>
-                </tr>
+                            <button wire:click="confirmDelete({{ $t->id }})"
+                                class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition shadow">
+                                Delete
+                            </button>
+
+                        </div>
+                    </div>
+
+                </div>
+
             @endforeach
-            </tbody>
-        </table>
+
+        </div>
+
     @endif
 
 
-    <!-- ========================================================= -->
-    <!--                     GLOBAL MODAL (NO JS)                  -->
-    <!-- ========================================================= -->
-    @if ($modalType)
+    <!-- ========================= DELETE MODAL ========================= -->
 
-        <!-- overlay -->
+    @if ($deleteId)
         <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
 
-            <!-- modal box -->
             <div class="bg-white w-full max-w-md p-6 rounded shadow-xl">
 
-                @if ($modalType === 'view')
-                    <h3 class="text-xl font-semibold mb-4">Description</h3>
+                <h3 class="text-xl font-semibold mb-4">Confirm Delete</h3>
 
-                    <p class="text-gray-700 whitespace-pre-line">
-                        {{ $modalContent }}
-                    </p>
+                <p class="text-gray-700 mb-6">
+                    Are you sure you want to delete this transaction?
+                </p>
 
-                    <div class="mt-6 flex justify-end">
-                        <button 
-                            wire:click="closeModal"
-                            class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition">
-                            Close
-                        </button>
-                    </div>
-                @endif
+                <div class="flex justify-end gap-3">
+                    <button wire:click="cancelDelete"
+                            class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
+                        Cancel
+                    </button>
 
-
-                @if ($modalType === 'delete')
-                    <h3 class="text-xl font-semibold text-red-700 mb-4">Confirm Delete</h3>
-
-                    <p class="text-gray-700">Are you sure you want to delete this transaction?</p>
-
-                    <div class="mt-6 flex justify-end gap-3">
-                        <button 
-                            wire:click="closeModal"
-                            class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition">
-                            Cancel
-                        </button>
-
-                        <button 
-                            wire:click="delete"
-                            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
-                            Yes, Delete
-                        </button>
-                    </div>
-                @endif
+                    <button wire:click="deleteConfirmed"
+                            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                        Delete
+                    </button>
+                </div>
 
             </div>
-        </div>
 
+        </div>
+    @endif
+
+
+    <!-- ========================= NOTES MODAL ========================= -->
+
+    @if ($showNotes)
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+
+            <div class="bg-white w-full max-w-md p-6 rounded shadow-xl">
+
+                <h3 class="text-xl font-semibold mb-4">Notes</h3>
+
+                <p class="text-gray-700 whitespace-pre-line">
+                    {{ $noteContent }}
+                </p>
+
+                <div class="mt-6 flex justify-end">
+                    <button wire:click="closeNotes"
+                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        Close
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
     @endif
 
 </div>

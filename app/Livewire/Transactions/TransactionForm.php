@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 #[Layout('components.layouts.app')]
 class TransactionForm extends Component
@@ -28,6 +29,7 @@ class TransactionForm extends Component
         'Healthcare', 'Education', 'Travel', 'Other Expense'
     ];
 
+    // Reset category when type changes
     public function updatedType()
     {
         $this->category = '';
@@ -60,10 +62,41 @@ class TransactionForm extends Component
             'notes'     => 'nullable|string',
         ]);
 
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // If editing → reverse the previous transaction effect
+        if ($this->transactionId) {
+            $old = Transaction::find($this->transactionId);
+
+            if ($old->type === 'income') {
+                $user->current_balance -= $old->amount;
+            } else {
+                $user->current_balance += $old->amount;
+            }
+        }
+
+        // Prevent negative balance
+        if ($this->type === 'expense' && $this->amount > $user->current_balance) {
+            throw ValidationException::withMessages([
+                'amount' => 'You cannot spend more than your current balance.',
+            ]);
+        }
+
+        // Apply new transaction effect
+        if ($this->type === 'income') {
+            $user->current_balance += $this->amount;
+        } else {
+            $user->current_balance -= $this->amount;
+        }
+
+        $user->save(); // <-- NOW Intelephense won’t complain
+
+        // Save transaction
         Transaction::updateOrCreate(
             ['id' => $this->transactionId],
             [
-                'user_id'   => Auth::id(),
+                'user_id'   => $user->id,
                 'type'      => $this->type,
                 'category'  => $this->category,
                 'amount'    => $this->amount,

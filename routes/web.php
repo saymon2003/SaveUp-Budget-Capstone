@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
-
+use App\Livewire\Dashboard;
 // Livewire components
 use App\Livewire\Transactions\TransactionsIndex;
 use App\Livewire\Transactions\TransactionForm;
@@ -36,6 +36,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
+
+        
+
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/dashboard', Dashboard::class)->name('dashboard');
+
+});
 
     // -------------------------------------------
     // Transactions (Livewire page components)

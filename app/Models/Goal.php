@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\GoalTransaction;
 
 class Goal extends Model
 {
@@ -14,10 +15,17 @@ class Goal extends Model
         'name',
         'target_amount',
         'current_amount',
+        'deadline',
+        'notes',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function goalTransactions()
+    {
+        return $this->hasMany(GoalTransaction::class);
     }
 }

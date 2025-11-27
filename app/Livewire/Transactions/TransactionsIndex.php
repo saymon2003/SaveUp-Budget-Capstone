@@ -5,16 +5,14 @@ namespace App\Livewire\Transactions;
 use Livewire\Component;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Attributes\Layout;
 
-#[Layout('components.layouts.app')]
 class TransactionsIndex extends Component
 {
-    public $transactions = [];
+    public $transactions;
 
-    public $modalType = null; // "view" or "delete"
-    public $modalContent = null; 
-    public $modalTransactionId = null;
+    public $deleteId = null;
+    public $showNotes = false;
+    public $noteContent = '';
 
     public function mount()
     {
@@ -23,45 +21,41 @@ class TransactionsIndex extends Component
             ->get();
     }
 
-    // Open View Notes modal
-    public function openViewModal($notes)
+    // ================= NOTES ==================
+
+    public function openNotes($id)
     {
-        $this->modalType = "view";
-        $this->modalContent = $notes;
-        $this->modalTransactionId = null;
+        $t = Transaction::findOrFail($id);
+        $this->noteContent = $t->notes;
+        $this->showNotes = true;
     }
 
-    // Open Delete modal
-    public function openDeleteModal($id)
+    public function closeNotes()
     {
-        $this->modalType = "delete";
-        $this->modalTransactionId = $id;
-        $this->modalContent = null;
+        $this->showNotes = false;
+        $this->noteContent = '';
     }
 
-    // Close any modal
-    public function closeModal()
+    // ================= DELETE ===================
+
+    public function confirmDelete($id)
     {
-        $this->modalType = null;
-        $this->modalContent = null;
-        $this->modalTransactionId = null;
+        $this->deleteId = $id;
     }
 
-    // Delete confirmed
-    public function delete()
+    public function cancelDelete()
     {
-        if ($this->modalTransactionId) {
-            Transaction::where('id', $this->modalTransactionId)
-                ->where('user_id', Auth::id())
-                ->delete();
-        }
+        $this->deleteId = null;
+    }
 
-        $this->closeModal();
+    public function deleteConfirmed()
+    {
+        Transaction::where('id', $this->deleteId)
+            ->where('user_id', Auth::id())
+            ->delete();
 
-        // Refresh data
-        $this->transactions = Transaction::where('user_id', Auth::id())
-            ->orderBy('date', 'desc')
-            ->get();
+        $this->deleteId = null;
+        $this->mount(); // refresh list
     }
 
     public function render()
