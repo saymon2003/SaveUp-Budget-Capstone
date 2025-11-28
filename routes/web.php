@@ -66,5 +66,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/test', function () {
     return view('test');
 });
+// Goals
+Route::get('/goals', \App\Livewire\Goals\GoalsIndex::class)->name('goals.index');
+Route::get('/goals/create', \App\Livewire\Goals\GoalCreate::class)->name('goals.create');
+Route::get('/goals/{id}', \App\Livewire\Goals\GoalShow::class)->name('goals.show');
+
 
 require __DIR__.'/auth.php';
