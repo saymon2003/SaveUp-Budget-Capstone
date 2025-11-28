@@ -88,5 +88,39 @@
         </div>
 
     @endif
+    {{-- ========================= RECENT GOALS ========================= --}}
+<div class="bg-white shadow rounded p-6 mt-6">
+    <h3 class="text-xl font-bold mb-4">Recent Goals</h3>
+
+    @if ($recentGoals->isEmpty())
+        <p class="text-gray-500">No goals created yet.</p>
+    @else
+        <ul class="divide-y">
+            @foreach ($recentGoals as $g)
+                <li class="py-3 flex justify-between items-center">
+
+                    <div>
+                        <p class="font-semibold">{{ $g->name }}</p>
+                        <p class="text-sm text-gray-600">
+                            {{ number_format($g->current_amount, 2) }} / 
+                            {{ number_format($g->target_amount, 2) }}
+                        </p>
+                    </div>
+
+                    <a href="{{ route('goals.show', $g->id) }}"
+                       class="text-blue-600 hover:underline">
+                        View →
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    @endif
+
+    <a href="{{ route('goals.index') }}"
+       class="block text-center mt-4 text-blue-600 hover:underline">
+        See All Goals →
+    </a>
+</div>
+
 
 </div>

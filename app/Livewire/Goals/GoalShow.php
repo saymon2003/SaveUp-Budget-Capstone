@@ -15,14 +15,13 @@ class GoalShow extends Component
     public $notes = null;
 
     public function mount($id)
-    {
-        /** @var \App\Models\Goal $goal */
-        $goal = Goal::where('id', $id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+{
+    $this->goal = Goal::with('transactions')
+        ->where('id', $id)
+        ->where('user_id', Auth::id())
+        ->firstOrFail();
+}
 
-        $this->goal = $goal;
-    }
 
     // -------------------------
     // Add money to goal

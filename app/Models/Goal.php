@@ -24,8 +24,9 @@ class Goal extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function goalTransactions()
+    // FIX: This must be named `transactions` for blade to work
+    public function transactions()
     {
-        return $this->hasMany(GoalTransaction::class);
+        return $this->hasMany(GoalTransaction::class, 'goal_id');
     }
 }

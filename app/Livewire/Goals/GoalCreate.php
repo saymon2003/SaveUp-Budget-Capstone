@@ -17,8 +17,8 @@ class GoalCreate extends Component
     {
         $this->validate([
             'name'           => 'required|string|max:255',
-            'target_amount'  => 'required|numeric|min:1',
-            'deadline'       => 'nullable|date',
+            'target_amount'  => 'required|numeric|min:0.01',
+            'deadline'       => 'nullable|date|after:today',
             'notes'          => 'nullable|string|max:500',
         ]);
 
@@ -26,9 +26,9 @@ class GoalCreate extends Component
             'user_id'        => Auth::id(),
             'name'           => $this->name,
             'target_amount'  => $this->target_amount,
-            'current_amount' => 0,
             'deadline'       => $this->deadline,
             'notes'          => $this->notes,
+            'current_amount' => 0,
         ]);
 
         return redirect()->route('goals.index');

@@ -38,9 +38,9 @@
                 Transactions
             </a>
 
-            <a href="#"
+            <a href="{{ route('goals.index') }}"
                class="block px-4 py-2 rounded hover:bg-gray-700">
-                Goals (coming soon)
+                Goals
             </a>
 
             <a href="{{ route('profile.edit') }}"

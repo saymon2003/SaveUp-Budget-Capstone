@@ -1,4 +1,4 @@
-<x-app-layout>
+
 
     <div class="max-w-4xl mx-auto">
 
@@ -67,4 +67,3 @@
 
     </div>
 
-</x-app-layout>

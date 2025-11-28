@@ -2,74 +2,51 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
+
+// Dashboard
 use App\Livewire\Dashboard;
-// Livewire components
+
+// Transactions
 use App\Livewire\Transactions\TransactionsIndex;
 use App\Livewire\Transactions\TransactionForm;
 
-// -------------------------------------------
-// Public Routes
-// -------------------------------------------
+// Goals
+use App\Livewire\Goals\GoalsIndex;
+use App\Livewire\Goals\GoalShow;
+use App\Livewire\Goals\GoalCreate;
 
-// Home Page
+// Welcome Page (public)
 Route::get('/', function () {
     return view('welcome');
 });
 
-// -------------------------------------------
-// Protected Routes (User Must Be Logged In)
-// -------------------------------------------
+// ===============================================
+// PROTECTED ROUTES (LOGIN REQUIRED)
+// ===============================================
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', Dashboard::class)->name('dashboard');
 
     // Profile
-    Route::get('/profile', [ProfileController::class, 'edit'])
-        ->name('profile.edit');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::patch('/profile', [ProfileController::class, 'update'])
-        ->name('profile.update');
+    // ------------------------
+    // TRANSACTIONS
+    // ------------------------
+    Route::get('/transactions', TransactionsIndex::class)->name('transactions.index');
+    Route::get('/transactions/create', TransactionForm::class)->name('transactions.create');
+    Route::get('/transactions/{id}/edit', TransactionForm::class)->name('transactions.edit');
 
-    Route::delete('/profile', [ProfileController::class, 'destroy'])
-        ->name('profile.destroy');
-
-        
-
-    Route::middleware(['auth'])->group(function () {
-        Route::get('/dashboard', Dashboard::class)->name('dashboard');
-
+    // ------------------------
+    // GOALS
+    // ------------------------
+    Route::get('/goals', GoalsIndex::class)->name('goals.index');
+    Route::get('/goals/create', GoalCreate::class)->name('goals.create');
+    Route::get('/goals/{id}', GoalShow::class)->name('goals.show');
 });
-
-    // -------------------------------------------
-    // Transactions (Livewire page components)
-    // -------------------------------------------
-
-    Route::get('/transactions', TransactionsIndex::class)
-        ->name('transactions.index');
-
-    Route::get('/transactions/create', TransactionForm::class)
-        ->name('transactions.create');
-
-    // IMPORTANT: Livewire expects parameter BEFORE edit
-    Route::get('/transactions/{id}/edit', TransactionForm::class)
-        ->name('transactions.edit');
-});
-
-// -------------------------------------------
-// Test Route (not protected)
-// -------------------------------------------
-
-Route::get('/test', function () {
-    return view('test');
-});
-// Goals
-Route::get('/goals', \App\Livewire\Goals\GoalsIndex::class)->name('goals.index');
-Route::get('/goals/create', \App\Livewire\Goals\GoalCreate::class)->name('goals.create');
-Route::get('/goals/{id}', \App\Livewire\Goals\GoalShow::class)->name('goals.show');
-
 
 require __DIR__.'/auth.php';

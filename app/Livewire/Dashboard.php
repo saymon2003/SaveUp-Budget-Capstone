@@ -12,20 +12,30 @@ use App\Models\Transaction;
 class Dashboard extends Component
 {
     public $balance;
+    public $recentGoals;
+
     public $recentTransactions;
 
     public function mount()
-    {
-        /** @var User $user */
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        $this->balance = $user->current_balance;
+    // Balance
+    $this->balance = $user->current_balance;
 
-        $this->recentTransactions = Transaction::where('user_id', $user->id)
-            ->orderBy('date', 'desc')
-            ->limit(5)
-            ->get();
-    }
+    // Recent Transactions
+    $this->recentTransactions = Transaction::where('user_id', $user->id)
+        ->orderBy('date', 'desc')
+        ->limit(5)
+        ->get();
+
+    // Recent Goals (order by creation)
+    $this->recentGoals = \App\Models\Goal::where('user_id', $user->id)
+        ->orderBy('created_at', 'desc')
+        ->limit(3)
+        ->get();
+}
+
 
     public function saveInitialBalance()
     {
