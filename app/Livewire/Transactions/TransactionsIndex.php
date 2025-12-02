@@ -3,44 +3,40 @@
 namespace App\Livewire\Transactions;
 
 use Livewire\Component;
-use App\Models\Transaction;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Transaction;
 
 class TransactionsIndex extends Component
 {
-    public $transactions;
-
     public $deleteId = null;
-    public $showNotes = false;
-    public $noteContent = '';
-
-    public function mount()
-    {
-        $this->transactions = Transaction::where('user_id', Auth::id())
-            ->orderBy('date', 'desc')
-            ->get();
-    }
-
-    // ================= NOTES ==================
-
-    public function openNotes($id)
-    {
-        $t = Transaction::findOrFail($id);
-        $this->noteContent = $t->notes;
-        $this->showNotes = true;
-    }
-
-    public function closeNotes()
-    {
-        $this->showNotes = false;
-        $this->noteContent = '';
-    }
-
-    // ================= DELETE ===================
 
     public function confirmDelete($id)
     {
         $this->deleteId = $id;
+    }
+
+    public function delete()
+    {
+        $transaction = Transaction::where('id', $this->deleteId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        // If it's an INCOME, subtract from balance
+        $user = Auth::user();
+        if ($transaction->type === 'income') {
+            $user->current_balance -= $transaction->amount;
+        }
+
+        // If it's an EXPENSE, add back to balance
+        if ($transaction->type === 'expense') {
+            $user->current_balance += $transaction->amount;
+        }
+        /** @var \App\Models\User $user */
+        $user->save();
+
+        $transaction->delete();
+
+        $this->deleteId = null;
     }
 
     public function cancelDelete()
@@ -48,18 +44,12 @@ class TransactionsIndex extends Component
         $this->deleteId = null;
     }
 
-    public function deleteConfirmed()
-    {
-        Transaction::where('id', $this->deleteId)
-            ->where('user_id', Auth::id())
-            ->delete();
-
-        $this->deleteId = null;
-        $this->mount(); // refresh list
-    }
-
     public function render()
     {
-        return view('livewire.transactions.transactions-index');
+        return view('livewire.transactions.transactions-index', [
+            'transactions' => Transaction::where('user_id', Auth::id())
+                ->orderBy('date', 'desc')
+                ->get()
+        ]);
     }
 }

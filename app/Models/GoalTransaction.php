@@ -11,8 +11,7 @@ class GoalTransaction extends Model
 
     protected $fillable = [
         'goal_id',
-        'user_id',
-        'type',      // add or remove
+        'type',
         'amount',
         'date',
         'notes',
@@ -21,10 +20,5 @@ class GoalTransaction extends Model
     public function goal()
     {
         return $this->belongsTo(Goal::class);
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
     }
 }
