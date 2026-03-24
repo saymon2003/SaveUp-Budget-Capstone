@@ -49,4 +49,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/goals/{id}', GoalShow::class)->name('goals.show');
 });
 
-require __DIR__.'/auth.php';
+Route::middleware(['throttle:5,1'])->group(function () {
+    require __DIR__.'/auth.php';
+});

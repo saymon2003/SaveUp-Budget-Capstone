@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Livewire\Goals;
-
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use App\Models\Goal;
 use App\Models\GoalTransaction;
@@ -25,15 +25,33 @@ class GoalShow extends Component
     /**
      * Add money to goal (capped)
      */
-    public function addToGoal()
-    {
-        $this->validate([
-            'amount' => 'required|numeric|min:0.01',
-            'notes'  => 'nullable|string|max:500',
-        ]);
+public function addToGoal()
+{
+    $this->validate([
+        'amount' => 'required|numeric|min:0.01',
+        'notes'  => 'nullable|string|max:500',
+    ]);
 
+    DB::transaction(function () {
+
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-        $remaining = $this->goal->target_amount - $this->goal->current_amount;
+        if (!$user) {
+            abort(403);
+        }
+
+        // 🔒 Lock user row
+        $user = \App\Models\User::where('id', $user->id)
+            ->lockForUpdate()
+            ->firstOrFail();
+
+        // 🔒 Lock goal row
+        $goal = \App\Models\Goal::where('id', $this->goal->id)
+            ->where('user_id', $user->id)
+            ->lockForUpdate()
+            ->firstOrFail();
+
+        $remaining = $goal->target_amount - $goal->current_amount;
 
         if ($remaining <= 0) {
             throw ValidationException::withMessages([
@@ -49,66 +67,75 @@ class GoalShow extends Component
 
         $amountToAdd = min($this->amount, $remaining);
 
-        // Update user balance
         $user->current_balance -= $amountToAdd;
-                /** @var \App\Models\User $user */
         $user->save();
 
-        // Update goal amount
-        $this->goal->current_amount += $amountToAdd;
-        $this->goal->save();
+        $goal->current_amount += $amountToAdd;
+        $goal->save();
 
-        // Log transaction
         GoalTransaction::create([
-            'goal_id' => $this->goal->id,
+            'goal_id' => $goal->id,
             'type'    => 'add',
             'amount'  => $amountToAdd,
             'date'    => now(),
             'notes'   => $this->notes,
         ]);
+    });
 
-        $this->reset(['amount', 'notes']);
-        $this->goal->refresh();
-    }
-
+    $this->reset(['amount', 'notes']);
+    $this->goal->refresh();
+}
     /**
      * Remove money from goal
      */
-    public function removeFromGoal()
-    {
-        $this->validate([
-            'amount' => 'required|numeric|min:0.01',
-            'notes'  => 'nullable|string|max:500',
-        ]);
+  public function removeFromGoal()
+{
+    $this->validate([
+        'amount' => 'required|numeric|min:0.01',
+        'notes'  => 'nullable|string|max:500',
+    ]);
 
-        if ($this->amount > $this->goal->current_amount) {
+    DB::transaction(function () {
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (!$user) {
+            abort(403);
+        }
+
+        $user = \App\Models\User::where('id', $user->id)
+            ->lockForUpdate()
+            ->firstOrFail();
+
+        $goal = \App\Models\Goal::where('id', $this->goal->id)
+            ->where('user_id', $user->id)
+            ->lockForUpdate()
+            ->firstOrFail();
+
+        if ($this->amount > $goal->current_amount) {
             throw ValidationException::withMessages([
                 'amount' => 'Cannot remove more than the goal currently has.',
             ]);
         }
 
-        // Add back to balance
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
         $user->current_balance += $this->amount;
         $user->save();
 
-        // Subtract from goal
-        $this->goal->current_amount -= $this->amount;
-        $this->goal->save();
+        $goal->current_amount -= $this->amount;
+        $goal->save();
 
-        // Log transaction
         GoalTransaction::create([
-            'goal_id' => $this->goal->id,
+            'goal_id' => $goal->id,
             'type'    => 'remove',
             'amount'  => $this->amount,
             'date'    => now(),
             'notes'   => $this->notes,
         ]);
+    });
 
-        $this->reset(['amount', 'notes']);
-        $this->goal->refresh();
-    }
+    $this->reset(['amount', 'notes']);
+    $this->goal->refresh();
+}
 
     /**
      * Delete a goal

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Livewire\Transactions;
-
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Transaction;
@@ -16,29 +16,31 @@ class TransactionsIndex extends Component
     }
 
     public function delete()
-    {
-        $transaction = Transaction::where('id', $this->deleteId)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+{
+    $transaction = Transaction::where('id', $this->deleteId)
+        ->where('user_id', Auth::id())
+        ->firstOrFail();
 
-        // If it's an INCOME, subtract from balance
-        $user = Auth::user();
+    /** @var \App\Models\User $user */
+    $user = Auth::user();
+
+    DB::transaction(function () use ($transaction, $user) {
+
+        // Reverse balance effect
         if ($transaction->type === 'income') {
             $user->current_balance -= $transaction->amount;
         }
 
-        // If it's an EXPENSE, add back to balance
         if ($transaction->type === 'expense') {
             $user->current_balance += $transaction->amount;
         }
-        /** @var \App\Models\User $user */
+
         $user->save();
-
         $transaction->delete();
+    });
 
-        $this->deleteId = null;
-    }
-
+    $this->deleteId = null;
+}
     public function cancelDelete()
     {
         $this->deleteId = null;
