@@ -1,54 +1,55 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProfileController;
-
-// Dashboard
 use App\Livewire\Dashboard;
-
-// Transactions
-use App\Livewire\Transactions\TransactionsIndex;
-use App\Livewire\Transactions\TransactionForm;
-
-// Goals
+use App\Livewire\Goals\GoalCreate;
 use App\Livewire\Goals\GoalsIndex;
 use App\Livewire\Goals\GoalShow;
-use App\Livewire\Goals\GoalCreate;
+use App\Livewire\Transactions\TransactionForm;
+use App\Livewire\Transactions\TransactionsIndex;
+use Illuminate\Support\Facades\Route;
 
-// Welcome Page (public)
-Route::get('/', function () {
-    return view('welcome');
+Route::view('/', 'welcome');
+
+Route::get('/dashboard', Dashboard::class)
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
+
+Route::get('/profile', function () {
+    return view('profile');
+})->middleware(['auth'])->name('profile');
+
+/*
+|--------------------------------------------------------------------------
+| Transactions
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/transactions', TransactionsIndex::class)
+        ->name('transactions.index');
+
+    Route::get('/transactions/create', TransactionForm::class)
+        ->name('transactions.create');
+
+    Route::get('/transactions/{id}/edit', TransactionForm::class)
+        ->name('transactions.edit');
 });
 
-// ===============================================
-// PROTECTED ROUTES (LOGIN REQUIRED)
-// ===============================================
+/*
+|--------------------------------------------------------------------------
+| Goals
+|--------------------------------------------------------------------------
+*/
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
+    Route::get('/goals', GoalsIndex::class)
+        ->name('goals.index');
 
-    // Dashboard
-    Route::get('/dashboard', Dashboard::class)->name('dashboard');
+    Route::get('/goals/create', GoalCreate::class)
+        ->name('goals.create');
 
-    // Profile
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    // ------------------------
-    // TRANSACTIONS
-    // ------------------------
-    Route::get('/transactions', TransactionsIndex::class)->name('transactions.index');
-    Route::get('/transactions/create', TransactionForm::class)->name('transactions.create');
-    Route::get('/transactions/{id}/edit', TransactionForm::class)->name('transactions.edit');
-
-    // ------------------------
-    // GOALS
-    // ------------------------
-    Route::get('/goals', GoalsIndex::class)->name('goals.index');
-    Route::get('/goals/create', GoalCreate::class)->name('goals.create');
-    Route::get('/goals/{id}', GoalShow::class)->name('goals.show');
+    Route::get('/goals/{id}', GoalShow::class)
+        ->name('goals.show');
 });
 
-Route::middleware(['throttle:5,1'])->group(function () {
-    require __DIR__.'/auth.php';
-});
+require __DIR__.'/auth.php';
