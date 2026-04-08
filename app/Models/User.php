@@ -51,7 +51,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new class extends VerifyEmail {
             protected function verificationUrl($notifiable)
             {
-                return url('/verify-email/' . $notifiable->getKey() . '/' . sha1($notifiable->getEmailForVerification()));
+                return url('/verify-email/'.$notifiable->getKey().'/'.sha1($notifiable->getEmailForVerification()));
             }
         });
     }
