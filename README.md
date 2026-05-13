@@ -1,59 +1,132 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 💰 SaveUp — Secure Personal Finance Web Application
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> A full-stack personal budgeting app built with **Laravel, Livewire, and Laravel Fortify** — featuring production-grade security, two-factor authentication, real-time financial tracking, and STRIDE threat modeling.
 
-## About Laravel
+[![Laravel](https://img.shields.io/badge/Laravel-11-red?style=flat-square&logo=laravel)](https://laravel.com)
+[![Livewire](https://img.shields.io/badge/Livewire-3-pink?style=flat-square)](https://livewire.laravel.com)
+[![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3-38bdf8?style=flat-square&logo=tailwindcss)](https://tailwindcss.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📸 Screenshots
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+> Dashboard · Transactions · Goals · Security Flow
 
-## Learning Laravel
+*(Add screenshots or GIF here)*
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## ✨ Features
 
-## Laravel Sponsors
+### 💳 Core Financial Features
+- **Dashboard** — real-time overview of balance, goals, and recent transactions
+- **Transaction Tracking** — add, categorize, and filter income/expense entries
+- **Savings Goals** — create goals and transfer funds with atomic balance updates
+- **User Profile** — manage account settings and preferences
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 🔐 Security Features (Production-Grade)
 
-### Premium Partners
+| Feature | Implementation |
+|---|---|
+| **Two-Factor Authentication (2FA)** | OTP sent via email, expires in 10 minutes, hashed in DB |
+| **Password Hashing** | Bcrypt via `Hash::make()` with complexity rules enforced |
+| **SQL Injection Prevention** | Laravel Eloquent ORM — no raw query string concatenation |
+| **XSS Protection** | Blade `{{ }}` escaped output on all user-supplied content |
+| **Brute Force Protection** | Laravel Fortify rate limiting (5 attempts/min per IP) |
+| **CSRF Protection** | Laravel CSRF tokens on every form submission |
+| **IDOR Prevention** | `Auth::id()` ownership checks on every database query |
+| **Race Condition Safety** | `DB::transaction()` + `lockForUpdate()` on balance changes |
+| **Session Security** | HttpOnly cookies, HTTPS enforcement, secure session config |
+| **STRIDE Threat Modeling** | Full threat analysis: Spoofing, Tampering, Repudiation, Info Disclosure, DoS, Privilege Escalation |
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+## 🛠️ Tech Stack
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Layer | Technology |
+|---|---|
+| **Frontend** | Blade, Livewire, Tailwind CSS |
+| **Backend** | PHP, Laravel 11 |
+| **Auth** | Laravel Fortify (2FA, email verification, rate limiting) |
+| **Database** | SQLite (dev) / MySQL (prod-ready) |
+| **ORM** | Laravel Eloquent |
+| **Build** | Vite |
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 🚀 Getting Started
 
-## Security Vulnerabilities
+### Prerequisites
+- PHP 8.2+
+- Composer
+- Node.js 18+
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Installation
 
-## License
+```bash
+# Clone the repo
+git clone https://github.com/saymon2003/SaveUp-Budget-Capstone.git
+cd SaveUp-Budget-Capstone
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Install PHP dependencies
+composer install
+
+# Install JS dependencies
+npm install && npm run build
+
+# Set up environment
+cp .env.example .env
+php artisan key:generate
+
+# Run migrations & seed
+php artisan migrate --seed
+
+# Start the server
+php artisan serve
+```
+
+Visit `http://localhost:8000` and register an account. You'll receive an email OTP to verify your 2FA login.
+
+---
+
+## 🔒 Security Architecture
+
+This project applies a **security-by-default** philosophy — security is not a feature added on top, it's baked into every layer.
+
+### Authentication Flow
+1. User submits credentials → Fortify validates + rate-limits
+2. On success → 6-digit OTP generated, hashed, stored with 10-min expiry, emailed
+3. User enters OTP → system checks hash + expiry → session granted
+4. All protected routes require `Auth::id()` ownership verification
+
+### Financial Consistency
+Balance updates (goals, transactions) are wrapped in `DB::transaction()` with `lockForUpdate()` row locks to prevent race conditions when concurrent requests hit the same records.
+
+### STRIDE Analysis Summary
+
+| Threat | Mitigation |
+|---|---|
+| **Spoofing** | Bcrypt hashing + email 2FA |
+| **Tampering** | CSRF tokens + signed sessions |
+| **Repudiation** | Login/logout audit logging with IP + timestamp |
+| **Info Disclosure** | HTTPS + HttpOnly cookies + hidden model fields |
+| **Denial of Service** | Rate limiting (5 req/min per identity+IP) |
+| **Privilege Escalation** | RBAC middleware + user_id binding on all queries |
+
+---
+
+## 👥 Team (Capstone — Winter 2026)
+
+| Name | Role |
+|---|---|
+| **Anas Abbadi** | Security Framework Implementation (2FA, OTP, rate limiting, IDOR, row locking) |
+| Gang Luo | STRIDE Threat Modeling |
+| YuTeng Wu | Access Matrix & Reporting |
+| Salma Zarrad | Audit Triggers & Database Security |
+
+---
+
+## 📄 License
+
+MIT License — see [LICENSE](LICENSE) for details.
